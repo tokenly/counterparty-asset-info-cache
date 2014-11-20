@@ -26,8 +26,8 @@ class CacheTest extends TestCase
         $cache->set('LTBCOIN', $this->sampleLTBCoinAssetInfo());
         PHPUnit::assertTrue($cache->isDivisible('LTBCOIN'));
 
-        $cache->set('ETHER', $this->sampleEtherAssetInfo());
-        PHPUnit::assertFalse($cache->isDivisible('ETHER'));
+        $cache->set('EARLY', $this->sampleEtherAssetInfo());
+        PHPUnit::assertFalse($cache->isDivisible('EARLY'));
     }
 
     public function testXCPDClient() {
@@ -76,16 +76,16 @@ EOT
     protected function sampleEtherAssetInfo() {
         return json_decode($_j=<<<EOT
     {
-        "asset": "ETHER",
+        "asset": "EARLY",
         "callable": false,
         "call_date": 0,
-        "description": "",
-        "owner": "1LMPuuw781iW3NJz2GYAjqg1m14s5zQ4Yy",
+        "description": "http://letstalkbitcoin.com/blog/post/tcv",
+        "owner": "1MCEtBB5X4ercRsvq2GmgysZ9ZDsqj8Xh7",
         "call_price": 0,
         "divisible": false,
-        "supply": 9223372036854775807,
-        "locked": false,
-        "issuer": "1LMPuuw781iW3NJz2GYAjqg1m14s5zQ4Yy"
+        "supply": 2401,
+        "locked": true,
+        "issuer": "1MCEtBB5X4ercRsvq2GmgysZ9ZDsqj8Xh7"
     }
 EOT
 , true);
