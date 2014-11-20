@@ -26,7 +26,7 @@ class CacheTest extends TestCase
         $cache->set('LTBCOIN', $this->sampleLTBCoinAssetInfo());
         PHPUnit::assertTrue($cache->isDivisible('LTBCOIN'));
 
-        $cache->set('EARLY', $this->sampleEtherAssetInfo());
+        $cache->set('EARLY', $this->sampleEarlyAssetInfo());
         PHPUnit::assertFalse($cache->isDivisible('EARLY'));
     }
 
@@ -73,7 +73,7 @@ EOT
 , true);
     }
 
-    protected function sampleEtherAssetInfo() {
+    protected function sampleEarlyAssetInfo() {
         return json_decode($_j=<<<EOT
     {
         "asset": "EARLY",
