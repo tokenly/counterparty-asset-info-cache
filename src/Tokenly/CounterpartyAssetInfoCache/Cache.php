@@ -25,6 +25,7 @@ class Cache
 
     public function isDivisible($asset_name) {
         $info = $this->get($asset_name);
+        if (!isset($info['divisible'])) { return null; }
         return !!$info['divisible'];
     }
 
@@ -39,7 +40,8 @@ class Cache
     protected function loadFromXCPD($asset_name) {
         $assets = $this->xcpd_client->get_asset_info(['assets' => [$asset_name]]);
         if (!$assets) {
-            throw new Exception("Unable to load asset info for asset ".json_encode($asset_name, 192).".", 1);
+            // this could be a non-valid asset
+            return [];
         }
         return $assets[0];
     }
