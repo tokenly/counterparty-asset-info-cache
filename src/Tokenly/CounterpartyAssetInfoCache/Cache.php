@@ -18,9 +18,17 @@ class Cache
     }
 
     public function get($asset_name) {
-        return $this->laravel_cache->rememberForever($asset_name, function() use ($asset_name) {
-            return $this->loadFromXCPD($asset_name);
-        });
+        $cached = $this->getFromCache($asset_name);
+        if ($cached === null) {
+            $info = $this->loadFromXCPD($asset_name);
+            if ($info) {
+                $this->laravel_cache->forever($asset_name, $info);
+            }
+        } else {
+            $info = [];
+        }
+
+        return $info;
     }
 
     public function isDivisible($asset_name) {
@@ -35,6 +43,10 @@ class Cache
 
     public function set($asset_name, $asset_info) {
         $this->laravel_cache->forever($asset_name, $asset_info);
+    }
+
+    public function forget($asset_name) {
+        $this->laravel_cache->forget($asset_name);
     }
 
     protected function loadFromXCPD($asset_name) {
