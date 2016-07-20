@@ -25,7 +25,7 @@ class Cache
                 $this->laravel_cache->forever($asset_name, $info);
             }
         } else {
-            $info = [];
+            $info = $cached;
         }
 
         return $info;
