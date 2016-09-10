@@ -55,7 +55,25 @@ class Cache
             // this could be a non-valid asset
             return [];
         }
-        return $assets[0];
+        $asset_info_data = $assets[0];
+
+        // get the latest issuance to add the transaction hash
+        $issuances = $this->xcpd_client->get_issuances([
+            'filters' => [
+                ['field' => 'asset',  'op' => '==', 'value' => $asset_name,],
+                ['field' => 'status', 'op' => '==', 'value' => 'valid',],
+            ],
+            'order_by' => 'tx_index',
+            'order_dir' => 'DESC',
+            'limit' => 1,
+        ]);
+        $issuance = $issuances ? $issuances[0] : [];
+
+        $asset_info_data['status']      = $issuance ? $issuance['status']      : null;
+        $asset_info_data['tx_hash']     = $issuance ? $issuance['tx_hash']     : null;
+        $asset_info_data['block_index'] = $issuance ? $issuance['block_index'] : null;
+
+        return $asset_info_data;
     }
 
 
