@@ -1,8 +1,9 @@
 <?php
 
-use \Mockery as m;
-use \Exception;
-use \PHPUnit_Framework_Assert as PHPUnit;
+use Mockery as m;
+use PHPUnit\Framework\Assert as PHPUnit;
+use Tokenly\CounterpartyAssetInfoCache\AssetCache;
+use Tokenly\CounterpartyClient\CounterpartyClient;
 
 /*
 * 
@@ -14,14 +15,14 @@ class CacheTest extends TestCase
     public function testSetCache() {
         $asset_info = $this->sampleLTBCoinAssetInfo();
 
-        $cache = $this->app->make('Tokenly\CounterpartyAssetInfoCache\Cache');
+        $cache = $this->app->make(AssetCache::class);
         $cache->set('LTBCOIN', $asset_info);
 
         PHPUnit::assertEquals($asset_info, $cache->getFromCache('LTBCOIN'));
     }
 
     public function testIsDivisible() {
-        $cache = $this->app->make('Tokenly\CounterpartyAssetInfoCache\Cache');
+        $cache = $this->app->make(AssetCache::class);
 
         $cache->set('LTBCOIN', $this->sampleLTBCoinAssetInfo());
         PHPUnit::assertTrue($cache->isDivisible('LTBCOIN'));
@@ -32,9 +33,10 @@ class CacheTest extends TestCase
 
     public function testXCPDClient() {
         $asset_info = $this->sampleLTBCoinAssetInfo();
-        $cache = $this->app->make('Tokenly\CounterpartyAssetInfoCache\Cache');
-        PHPUnit::assertEquals($asset_info, $cache->get('LTBCOIN'));
-        PHPUnit::assertEquals($asset_info, $cache->getFromCache('LTBCOIN'));
+        $cache = $this->app->make(AssetCache::class);
+        $expected_combined_info = array_merge($asset_info, $this->sampleLTBCoinIssuancesInfo());
+        PHPUnit::assertEquals($expected_combined_info, $cache->get('LTBCOIN'));
+        PHPUnit::assertEquals($expected_combined_info, $cache->getFromCache('LTBCOIN'));
     }
 
 
@@ -46,9 +48,21 @@ class CacheTest extends TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $app->bind('Tokenly\XCPDClient\Client', function() {
-            $client = m::mock('Tokenly\XCPDClient\Client');
+        $app->bind(CounterpartyClient::class, function() {
+            $client = m::mock(CounterpartyClient::class);
             $client->shouldReceive('get_asset_info')->with(['assets' => ['LTBCOIN']])->andReturn([$this->sampleLTBCoinAssetInfo()]);
+
+            $expected_issuances_query = [
+                'filters' => [
+                    ['field' => 'asset',  'op' => '==', 'value' => 'LTBCOIN',],
+                    ['field' => 'status', 'op' => '==', 'value' => 'valid',],
+                ],
+                'order_by' => 'tx_index',
+                'order_dir' => 'DESC',
+                'limit' => 1,
+            ];
+
+            $client->shouldReceive('get_issuances')->with($expected_issuances_query)->andReturn([$this->sampleLTBCoinIssuancesInfo()]);
             return $client;
         });
     }
@@ -68,6 +82,17 @@ class CacheTest extends TestCase
         "supply": 17731189327990000,
         "locked": false,
         "issuer": "1Hso4cqKAyx9bsan8b5nbPqMTNNce8ZDto"
+    }
+EOT
+, true);
+    }
+
+    protected function sampleLTBCoinIssuancesInfo() {
+        return json_decode($_j=<<<EOT
+    {
+        "status": "valid",
+        "tx_hash": "0x0f00",
+        "block_index": 1000000
     }
 EOT
 , true);

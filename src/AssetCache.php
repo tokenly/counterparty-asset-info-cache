@@ -3,24 +3,24 @@
 namespace Tokenly\CounterpartyAssetInfoCache;
 
 use Illuminate\Contracts\Cache\Repository;
-use Tokenly\XCPDClient\Client;
+use Tokenly\CounterpartyClient\CounterpartyClient;
 use \Exception;
 
 /*
-* Cache
+* AssetCache
 */
-class Cache
+class AssetCache
 {
-    public function __construct(Repository $laravel_cache, Client $xcpd_client)
+    public function __construct(Repository $laravel_cache, CounterpartyClient $counterparty_client)
     {
         $this->laravel_cache = $laravel_cache;
-        $this->xcpd_client = $xcpd_client;
+        $this->counterparty_client = $counterparty_client;
     }
 
     public function get($asset_name) {
         $cached = $this->getFromCache($asset_name);
         if ($cached === null) {
-            $info = $this->loadFromXCPD($asset_name);
+            $info = $this->loadFromCounterparty($asset_name);
             if ($info) {
                 $this->laravel_cache->forever($asset_name, $info);
             }
@@ -45,7 +45,7 @@ class Cache
         }
 
         if ($assets_to_load) {
-            $xcpd_results = $this->loadFromXCPD($assets_to_load);
+            $xcpd_results = $this->loadFromCounterparty($assets_to_load);
             if ($xcpd_results) {
                 foreach($xcpd_results as $xcpd_result) {
                     $asset_results_by_name[$xcpd_result['asset']] = $xcpd_result;
@@ -75,14 +75,14 @@ class Cache
         $this->laravel_cache->forget($asset_name);
     }
 
-    protected function loadFromXCPD($asset_names) {
+    protected function loadFromCounterparty($asset_names) {
         $requested_single_asset = false;
         if (!is_array($asset_names)) {
             $asset_names = [$asset_names];
             $requested_single_asset = true;
         }
 
-        $assets = $this->xcpd_client->get_asset_info(['assets' => $asset_names]);
+        $assets = $this->counterparty_client->get_asset_info(['assets' => $asset_names]);
         if (!$assets) {
             // this could be a non-valid asset
             return [];
@@ -94,7 +94,7 @@ class Cache
             $asset_info_data = $assets[$offset];
 
             // get the latest issuance to add the transaction hash
-            $issuances = $this->xcpd_client->get_issuances([
+            $issuances = $this->counterparty_client->get_issuances([
                 'filters' => [
                     ['field' => 'asset',  'op' => '==', 'value' => $asset_name,],
                     ['field' => 'status', 'op' => '==', 'value' => 'valid',],

@@ -1,8 +1,9 @@
 <?php
 
-use \Mockery as m;
-use \Exception;
-use \PHPUnit_Framework_Assert as PHPUnit;
+use Mockery as m;
+use PHPUnit\Framework\Assert as PHPUnit;
+use Tokenly\CounterpartyAssetInfoCache\AssetCache;
+use Tokenly\CounterpartyClient\CounterpartyClient;
 
 /*
 * 
@@ -14,7 +15,7 @@ class CacheIntegrationTest extends TestCase
         if (!getenv('XCPD_CONNECTION_STRING')) { $this->markTestIncomplete(); }
 
         $asset_info = $this->sampleLTBCoinAssetInfo();
-        $cache = $this->app->make('Tokenly\CounterpartyAssetInfoCache\Cache');
+        $cache = $this->app->make(AssetCache::class);
 
         PHPUnit::assertEquals($asset_info, $cache->get('LTBCOIN'));
         PHPUnit::assertEquals($asset_info, $cache->getFromCache('LTBCOIN'));
@@ -29,11 +30,11 @@ class CacheIntegrationTest extends TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $app->bind('Tokenly\XCPDClient\Client', function() {
+        $app->bind(CounterpartyClient::class, function() {
             $connection_string = getenv('XCPD_CONNECTION_STRING');
             $rpc_user = getenv('XCPD_RPC_USER');
             $rpc_password = getenv('XCPD_RPC_PASSWORD');
-            $client = new \Tokenly\XCPDClient\Client($connection_string, $rpc_user, $rpc_password);
+            $client = new CounterpartyClient($connection_string, $rpc_user, $rpc_password);
             return $client;
         });
     }
@@ -42,15 +43,16 @@ class CacheIntegrationTest extends TestCase
         return json_decode($_j=<<<EOT
     {
         "asset": "LTBCOIN",
-        "callable": false,
-        "call_date": 0,
         "description": "Crypto-Rewards Program http://ltbcoin.com",
-        "owner": "1Hso4cqKAyx9bsan8b5nbPqMTNNce8ZDto",
-        "call_price": 0,
+        "owner": "3MAmfj1J3jBCf1XGmqXWjne2WstMNkE6T8",
         "divisible": true,
-        "supply": 17731189327990000,
-        "locked": false,
-        "issuer": "1Hso4cqKAyx9bsan8b5nbPqMTNNce8ZDto"
+        "supply": 49386391467990000,
+        "locked": true,
+        "issuer": "3MAmfj1J3jBCf1XGmqXWjne2WstMNkE6T8",
+        "asset_longname": null,
+        "status": "valid",
+        "tx_hash": "0458efae135cee3ef1e245038d061c5c64636e19ed531ad67359c19a2f26e5b0",
+        "block_index": 461006
     }
 EOT
 , true);
