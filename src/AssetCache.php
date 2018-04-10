@@ -3,7 +3,6 @@
 namespace Tokenly\CounterpartyAssetInfoCache;
 
 use Illuminate\Contracts\Cache\Repository;
-use Tokenly\CounterpartyClient\CounterpartyClient;
 use \Exception;
 
 /*
@@ -11,7 +10,7 @@ use \Exception;
 */
 class AssetCache
 {
-    public function __construct(Repository $laravel_cache, CounterpartyClient $counterparty_client)
+    public function __construct(Repository $laravel_cache, $counterparty_client)
     {
         $this->laravel_cache = $laravel_cache;
         $this->counterparty_client = $counterparty_client;
