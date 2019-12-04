@@ -12,11 +12,11 @@
     ],
     "require": {
         "php": ">=5.6.0",
-        "tokenly/xcpd-client": "^1"
+        "tokenly/xcpd-client": "dev-master"
     },
     "require-dev": {
-        "phpunit/phpunit": "~6",
-        "mockery/mockery": "~0.9",
+        "phpunit/phpunit": "~7",
+        "mockery/mockery": "~1",
         "orchestra/testbench": "^3.5"
     },
     "minimum-stability": "dev",
